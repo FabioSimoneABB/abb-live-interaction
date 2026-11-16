@@ -486,7 +486,32 @@ function QuestionCard({ q, index, total, rows, onEdit, onToggle, onDelete, onMov
     return result;
   }, [rows]);
   return <section className="card result-card"><div className="result-title"><div><p className="eyebrow">{q.type} · {q.is_open ? 'attiva' : 'in pausa'}</p><h3>{q.prompt}</h3></div><span className="answer-count">{rows.length} risposte</span></div>
-    {Object.keys(counts).length > 0 ? <div className="result-list">{Object.entries(counts).sort((a,b) => b[1] - a[1]).map(([answer, count]) => <div className="result-row" key={answer}><span>{answer}</span><strong>{count}</strong><div className="bar"><span style={{ width: `${Math.max(4, count / Math.max(rows.length,1) * 100)}%` }} /></div></div>) : <p className="muted">Ancora nessuna risposta.</p>}
+    {Object.keys(counts).length > 0 ? (
+  <div className="result-list">
+    {Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([answer, count]) => {
+        const percentage = Math.round(
+          (count / Math.max(rows.length, 1)) * 100
+        );
+        const barWidth = Math.max(4, percentage);
+
+        return (
+          <div className="result-row" key={answer}>
+            <span>{answer}</span>
+            <strong>
+              {count} ({percentage}%)
+            </strong>
+            <div className="bar">
+              <span style={{ width: `${barWidth}%` }} />
+            </div>
+          </div>
+        );
+      })}
+  </div>
+) : (
+  <p className="muted">Ancora nessuna risposta.</p>
+)}
     <details><summary>Visualizza risposte individuali</summary>{rows.map(r => <div className="response-row" key={r.id}><span>{answerToText(r.answer)}</span><small>{r.elapsed_seconds ?? 'n/d'} s · {new Date(r.created_at).toLocaleString()}</small></div>)}</details>
     <div className="toolbar compact"><Button className="small secondary" onClick={onMove.bind(null, -1)} disabled={index === 0}>↑ Su</Button><Button className="small secondary" onClick={onMove.bind(null, 1)} disabled={index === total - 1}>↓ Giù</Button><Button className="small secondary" onClick={onEdit}>Modifica</Button><Button className="small secondary" onClick={onToggle}>{q.is_open ? 'Metti in pausa' : 'Riattiva'}</Button><Button className="small danger" onClick={onDelete}>Elimina</Button></div>
   </section>;
